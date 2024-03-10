@@ -1,8 +1,9 @@
-from typing import Optional, List, Any
+from typing import Optional, Any
 from pydantic import BaseModel
-import json
+from datetime import datetime
 
-# TODO: Clean up all the "Any" types to be more specific and make Pydantic calm down
+import json
+import requests
 
 
 class Cloud(BaseModel):
@@ -12,24 +13,21 @@ class Cloud(BaseModel):
     Attributes:
         cover (str): The cloud cover type.
         base (int): The cloud base height.
-        type (Optional[Any]): The cloud type (optional).
+        type (Optional[str]): The cloud type (optional). Only value is "CB"
     """
 
     cover: str
     base: int
-    type: Optional[Any] = None
-
-    class Config:
-        arbitrary_types_allowed = True
+    type: Optional[str]
 
 
-class Forecast:
+class Forecast(BaseModel):
     """
     Represents a weather forecast. Based on https://aviationweather.gov/data/api/#/Data/dataTaf.
 
     Attributes:
         timeGroup (int): The time group of the forecast.
-        timeFrom (int): The starting time of the forecast.
+        timeFrom (int): The starting time of the forecast. In UNIX Epoch format
         timeTo (int): The ending time of the forecast.
         timeBec (Optional[Any]): The time when the forecast becomes valid.
         fcstChange (Optional[str]): The forecast change information.
@@ -51,28 +49,26 @@ class Forecast:
     """
 
     timeGroup: int
-    timeFrom: int
-    timeTo: int
-    timeBec: Optional[Any] = None
-    fcstChange: Optional[str] = None
-    probability: Optional[Any] = None
+    timeFrom: datetime
+    timeTo: datetime
+    timeBec: Optional[datetime]
+    fcstChange: Optional[str]
+    probability: Optional[str]
     wdir: int
     wspd: int
     wgst: Optional[int] = None
-    wshearHgt: Optional[Any] = None
-    wshearDir: Optional[Any] = None
-    wshearSpd: Optional[Any] = None
-    visib: str
-    altim: Optional[Any] = None
-    vertVis: Optional[Any] = None
-    wxString: Optional[Any] = None
-    notDecoded: Optional[Any] = None
-    clouds: List[Cloud]
-    icgTurb: List[Any]
-    temp: List[Any]
+    wshearHgt: Optional[int] = None
+    wshearDir: Optional[int] = None
+    wshearSpd: Optional[int] = None
+    visib: int | str
+    altim: Optional[str] = None
+    vertVis: Optional[str] = None
+    wxString: Optional[str] = None
+    notDecoded: Optional[str] = None
+    clouds: list[Cloud]
+    icgTurb: list[str]
+    temp: list[str]
 
-    class Config:
-        arbitrary_types_allowed = True
 
 
 class TAF(BaseModel):
@@ -101,11 +97,11 @@ class TAF(BaseModel):
 
     tafId: int
     icaoId: str
-    dbPopTime: str
-    bulletinTime: str
-    issueTime: str
-    validTimeFrom: int
-    validTimeTo: int
+    dbPopTime: datetime
+    bulletinTime: datetime
+    issueTime: datetime
+    validTimeFrom: datetime
+    validTimeTo: datetime
     rawTAF: str
     mostRecent: int
     remarks: str
@@ -114,22 +110,18 @@ class TAF(BaseModel):
     elev: int
     prior: int
     name: str
-    fcsts: List[Forecast]
-
-    class Config:
-        arbitrary_types_allowed = True
+    fcsts: list[Forecast] = []
 
 
-def load_taf_from_json(json_data: str) -> List[TAF]:
-    return TAF.model_validate_json(json_data)
+def main():
+    url = "https://aviationweather.gov/api/data/taf?ids=KBOS&format=json&date=2024-03-09T020:00:00Z"
+    response = requests.get(url)
+    data = response.json()
+
+    for taf in data:
+        model = TAF(**taf)
+        print(model.rawTAF)
 
 
-
-# Assuming your JSON data is in a string named json_str
-json_str = """[{"tafId":14824092,"icaoId":"KBOS","dbPopTime":"2024-03-09 21:06:34","bulletinTime":"2024-03-09 19:10:00","issueTime":"2024-03-09 19:10:00","validTimeFrom":1710010800,"validTimeTo":1710115200,"rawTAF":"KBOS 091910Z 0919\/1024 11012KT P6SM BKN020 FM100000 13012G19KT P6SM VCSH OVC008 FM100200 11018G30KT 4SM -RA BR OVC008 FM100700 10023G37KT 2SM RA BR OVC008 WS020\/13060KT FM101100 14021G25KT P6SM VCSH OVC008 FM101400 22014G24KT P6SM SCT030","mostRecent":0,"remarks":"AMD","lat":42.3606,"lon":-71.0097,"elev":4,"prior":2,"name":"Boston\/Logan Intl, MA, US","fcsts":[{"timeGroup":0,"timeFrom":1710010800,"timeTo":1710028800,"timeBec":null,"fcstChange":null,"probability":null,"wdir":110,"wspd":12,"wgst":null,"wshearHgt":null,"wshearDir":null,"wshearSpd":null,"visib":"6+","altim":null,"vertVis":null,"wxString":null,"notDecoded":null,"clouds":[{"cover":"BKN","base":2000,"type":null}],"icgTurb":[],"temp":[]}]}]"""
-
-# Now, use the function to parse the JSON string
-tafs = load_taf_from_json(json_str)
-
-# Example usage
-print(tafs[0])  # Prints the first TAF object in the list
+if __name__ == "__main__":
+    main()
