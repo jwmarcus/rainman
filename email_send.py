@@ -7,9 +7,10 @@ import os
 # Load environment variables
 load_dotenv()
 
+
 def send_email_via_gmail(subject, message, to_email):
     gmail_user = os.getenv("GMAIL_USER")
-    gmail_password = os.getenv("GMAIL_PASS") # relay-user-python-dev (app password)
+    gmail_password = os.getenv("GMAIL_PASS")  # relay-user-python-dev (app password)
 
     msg = MIMEMultipart()
     msg["From"] = gmail_user
