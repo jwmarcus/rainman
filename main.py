@@ -32,7 +32,6 @@ def main():
     for taf in data:
         model = TAF(**taf)
         print(f"Station:    {model.icaoId}")
-        print()
         print(
             f"Issue Time: {model.issueTime.astimezone(eastern_tz).strftime(datetime_format)}"
         )
@@ -45,18 +44,15 @@ def main():
         print("")
 
         for forecast in model.fcsts:
-            print(
-                f"TimeFrom: {forecast.timeFrom.astimezone(eastern_tz).strftime(datetime_format)}"
-            )
-            print(
-                f"TimeTo:   {forecast.timeTo.astimezone(eastern_tz).strftime(datetime_format)}"
-            )
-            print(f"WindDir:  {forecast.wdir}")
-            print(f"WindSpd:  {forecast.wspd}")
-            print(f"WxString: {forecast.wxString}")
-            print("")
-
-        print(model.rawTAF)
+            if forecast.wxString is not None:
+                print(
+                    f"TimeFrom: {forecast.timeFrom.astimezone(eastern_tz).strftime(datetime_format)}"
+                )
+                print(
+                    f"TimeTo:   {forecast.timeTo.astimezone(eastern_tz).strftime(datetime_format)}"
+                )
+                print(f"WxString: {forecast.wxString}")
+                print("")
 
 
 if __name__ == "__main__":
