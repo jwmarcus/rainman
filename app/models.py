@@ -1,6 +1,12 @@
 from typing import Optional, Any
-from pydantic import BaseModel, validator
+from pydantic import field_validator, BaseModel
 from datetime import datetime, timezone
+
+# Notes on how this works:
+# Pydantic is a data validation and settings management using Python type annotations.
+# In this model, all fields are required. Fields with `Optional` are allowed to be `None`, 
+# and fields with a default value of `[]` are allowed to be an empty list. If the API 
+# doesn't return any of these fields, Pydantic will raise a `ValidationError`.
 
 
 # TODO: Encode this into an enum or something
@@ -14,13 +20,17 @@ class Cloud(BaseModel):
 
     Attributes:
         cover (str): The cover of the cloud.
+        SKC (sky clear), FEW (trace), SCT (scattered), BKN (broken) 
+        and OVC (overcast). Cloud cover is reported in terms of 1/8th 
+        of sky cover with 1-2/8th being FEW, 3-4/8ths being SCT, 5-7/8th 
+        being BKN and 8/8 denoted at OVC
         base (int): The base of the cloud.
-        type (Optional[str]): The type of the cloud (optional).
+        type (Optional[str]): The type of the cloud (optional). None or CB (Cumulonimbus)
     """
 
     cover: str
-    base: int
-    type: Optional[str]
+    base: Optional[int] = None
+    type: Optional[str] = None
 
 
 class Forecast(BaseModel):
@@ -54,9 +64,9 @@ class Forecast(BaseModel):
     timeGroup: int
     timeFrom: datetime
     timeTo: datetime
-    timeBec: Optional[datetime]
-    fcstChange: Optional[str]
-    probability: Optional[str]
+    timeBec: Optional[datetime] = None
+    fcstChange: Optional[str] = None
+    probability: Optional[str] = None
     wdir: int
     wspd: int
     wgst: Optional[int] = None
@@ -114,8 +124,9 @@ class TAF(BaseModel):
     name: str
     fcsts: list[Forecast] = []
 
-    @validator("dbPopTime", "bulletinTime", "issueTime", pre=True)
-    def convert_time(cls, v):
+    @field_validator("dbPopTime", "bulletinTime", "issueTime", mode="before")
+    @classmethod
+    def convert_time(cls, v: str):
         """
         Convert a string representation of a datetime to an aware datetime object.
         The avaiationweather.gov API returns datetime objects as strings in the format "YYYY-MM-DD HH:MM:SS".
