@@ -7,21 +7,15 @@ This project demonstrates the parsing and validation of weather forecast data (T
 - `models.py`: Contains `pydantic` models that represent the structure of the weather data.
 - `main.py`: An example script that shows how to load, parse, and validate JSON weather data.
 
-## Requirements
-
-- Python 3.8+
-- pydantic
-
 Install the required packages using pip:
 
 ```
-pip install pydantic
+pip install -r requirements.txt
 ```
 
 ## Usage
 
-1. Define your `pydantic` models in `models.py`.
-2. Use the example in `main.py` to parse your JSON data.
+1. run the app using `uvicorn app:app --reload`
 
 ## Example
 
