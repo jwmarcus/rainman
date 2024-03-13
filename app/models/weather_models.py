@@ -19,8 +19,8 @@ class Cloud(BaseModel):
     """
 
     cover: str
-    base: int
-    type: Optional[str]
+    base: Optional[int] = None
+    type: Optional[str] = None
 
 
 class Forecast(BaseModel):
