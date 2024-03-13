@@ -2,6 +2,7 @@ from app.models import TAF
 from datetime import datetime, timezone
 import pytest
 
+
 def test_convert_time_valid_format() -> None:
     # Arrange
     input_time = "2022-01-01 12:00:00"
@@ -12,6 +13,7 @@ def test_convert_time_valid_format() -> None:
 
     # Assert
     assert result == expected_output
+
 
 def test_convert_time_invalid_format() -> None:
     # Arrange
