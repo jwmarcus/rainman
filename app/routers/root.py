@@ -1,6 +1,5 @@
-from fastapi import APIRouter, Depends
 from starlette.requests import Request
-import httpx
+from fastapi import APIRouter
 
 router = APIRouter()
 
@@ -14,8 +13,8 @@ def get_http_client(request: Request):
 async def index():
     return {"message": "..:: goliath online ::.."}
 
-@router.get("/joke")
-async def read_joke(client: httpx.AsyncClient = Depends(get_http_client)):
-    response = await client.get('https://api.api-ninjas.com/v1/dadjokes?limit=1')
-    print(response.json())
-    return response.json()
+# @router.get("/joke")
+# async def read_joke(client: httpx.AsyncClient = Depends(get_http_client)):
+#     response = await client.get('https://api.api-ninjas.com/v1/dadjokes?limit=1')
+#     print(response.json())
+#     return response.json()
