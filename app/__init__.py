@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import httpx
 
 # Local application/library specific imports
-from .routers import root, weather
+from .routers import root_router, weather_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -31,5 +31,5 @@ app.add_middleware(
 )
 
 # Include the routers
-app.include_router(root.router)
-app.include_router(weather.router)
+app.include_router(root_router.router)
+app.include_router(weather_router.router)
