@@ -2,8 +2,8 @@ services:
   app:
     build: .
     container_name: rainman
-    # override the default command, and watch all files for changes
-    command: uvicorn app:app --host 0.0.0.0 --port 80 --reload --reload-include *
+    # override the default command, and watch all .py files for changes
+    command: uvicorn app:app --host 0.0.0.0 --port 80 --reload --reload-include *.py
     ports:
       - 8080:80 # map the port FROM 8080 on host TO 80 in container
     volumes:
