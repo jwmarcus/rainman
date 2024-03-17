@@ -57,8 +57,8 @@ class Forecast(BaseModel):
     timeBec: Optional[datetime]
     fcstChange: Optional[str]
     probability: Optional[str]
-    wdir: int
-    wspd: int
+    wdir: Optional[int] = None
+    wspd: Optional[int] = None
     wgst: Optional[int] = None
     wshearHgt: Optional[int] = None
     wshearDir: Optional[int] = None

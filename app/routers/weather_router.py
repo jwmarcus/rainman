@@ -13,6 +13,9 @@ import asyncio
 from ..models.weather_models import TAF
 
 WEATHER_API = "https://aviationweather.gov/api/data/taf"
+# Define the format for the datetime strings.
+DT_FMT = "%a %m-%d %I:%M %p"
+EASTERN_TZ = ZoneInfo("America/New_York")
 
 router = APIRouter()
 
@@ -37,7 +40,27 @@ async def get_current_weather(airport: str) -> Dict[str, Any]:
     # Get the weather data for the provided airport.
     current_datetime = datetime.now(timezone.utc)
     data = await get_taf_data(airport, "json", current_datetime.isoformat())
-    return {"message": data}
+    
+    weather_events = []
+    for taf in data:
+        model = None
+        try:
+            model = TAF(**taf)
+            for forecast in model.fcsts:
+                if forecast.wxString is not None:
+                    weather_event = {
+                        "TimeFrom": {forecast.timeFrom.astimezone(EASTERN_TZ).strftime(DT_FMT)},
+                        "TimeTo":   {forecast.timeTo.astimezone(EASTERN_TZ).strftime(DT_FMT)},
+                        "WxString": {forecast.wxString},
+                    }
+                    weather_events.append(weather_event)
+
+        except Exception as e:
+            print(f"Error: {e}")
+            print(f"Data: {taf}")
+            continue
+
+    return {"weather_events": weather_events}
 
 
 @router.get("/weather")
@@ -55,9 +78,6 @@ def main():
 if __name__ == "__main__":
     main()
 
-# # Define the format for the datetime strings.
-# datetime_format = "%a %m-%d %I:%M %p"
-# eastern_tz = ZoneInfo("America/New_York")
 
 # Print the TAF data.
 # for taf in data:
